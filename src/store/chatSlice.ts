@@ -24,12 +24,12 @@ const initialState: ChatState = {
 export const sendMessage = createAsyncThunk(
   'chat/sendMessage',
   async (
-    { message, conversationHistory, interactionId }:
-    { message: string; conversationHistory: { role: string; content: string }[]; interactionId?: number | null },
+    { message, conversationHistory, interactionId, currentFormState }:
+    { message: string; conversationHistory: { role: string; content: string }[]; interactionId?: number | null; currentFormState?: Record<string, any> | null },
     { rejectWithValue, dispatch },
   ) => {
     try {
-      const res = await api.sendChatMessage(message, conversationHistory, interactionId);
+      const res = await api.sendChatMessage(message, conversationHistory, interactionId, currentFormState);
       const data = res.data;
 
       // Always fill the form if we got form_data back

@@ -89,10 +89,13 @@ const formSlice = createSlice({
       const i = action.payload;
       state.hcp_name = i.hcp_name;
       state.interaction_type = i.interaction_type;
-      // Parse date from ISO to DD-MM-YYYY
-      const d = new Date(i.date);
-      state.date = `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
-      state.time = d.toTimeString().slice(0, 5);
+      // Parse date from ISO to DD-MM-YYYY (strip fractional seconds for Safari support)
+      const safeDateStr = i.date.split('.')[0];
+      const d = new Date(safeDateStr);
+      if (!isNaN(d.getTime())) {
+        state.date = `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+        state.time = d.toTimeString().slice(0, 5);
+      }
       state.topics_discussed = i.topics_discussed || '';
       state.sentiment = i.sentiment;
       state.outcomes = i.outcomes || '';

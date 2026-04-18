@@ -28,9 +28,12 @@ export default function InteractionList() {
     dispatch(resetForm());
   };
 
-  const handleDelete = (e: React.MouseEvent, id: number) => {
+  const handleDelete = async (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
-    dispatch(removeInteraction(id));
+    await dispatch(removeInteraction(id));
+    if (editingId === id) {
+      dispatch(resetForm());
+    }
   };
 
   const formatDate = (dateStr: string) => {

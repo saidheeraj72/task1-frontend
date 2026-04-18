@@ -84,10 +84,12 @@ export const sendChatMessage = (
   message: string,
   conversationHistory: { role: string; content: string }[] = [],
   interactionId: number | null = null,
+  currentFormState: Record<string, any> | null = null,
 ) => API.post<ChatResponseData>('/chat/', {
   message,
   conversation_history: conversationHistory,
   interaction_id: interactionId,
+  current_form_state: currentFormState,
 });
 
 export default API;

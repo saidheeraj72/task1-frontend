@@ -55,7 +55,7 @@ export default function InteractionForm() {
     const payload = {
       hcp_name: form.hcp_name,
       interaction_type: form.interaction_type,
-      date: form.date.split('-').reverse().join('-'),
+      date: `${form.date.split('-').reverse().join('-')}T${form.time}:00`,
       topics_discussed: form.topics_discussed,
       sentiment: form.sentiment,
       outcomes: form.outcomes,
