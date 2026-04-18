@@ -83,9 +83,11 @@ export const seedMaterials = () => API.get('/seed-materials');
 export const sendChatMessage = (
   message: string,
   conversationHistory: { role: string; content: string }[] = [],
+  interactionId: number | null = null,
 ) => API.post<ChatResponseData>('/chat/', {
   message,
   conversation_history: conversationHistory,
+  interaction_id: interactionId,
 });
 
 export default API;

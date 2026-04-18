@@ -9,6 +9,7 @@ import type { RootState, AppDispatch } from '../store/store';
 export default function ChatPanel() {
   const dispatch = useDispatch<AppDispatch>();
   const { messages, loading } = useSelector((s: RootState) => s.chat);
+  const { editingId } = useSelector((s: RootState) => s.form);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -28,7 +29,8 @@ export default function ChatPanel() {
       content: m.content,
     }));
 
-    const result = await dispatch(sendMessage({ message: text, conversationHistory }));
+    console.log("DEBUG ChatPanel: Sending payload with editingId =", editingId);
+    const result = await dispatch(sendMessage({ message: text, conversationHistory, interactionId: editingId }));
     const payload = result.payload as any;
 
     // Refresh interactions list if something was saved

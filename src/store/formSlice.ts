@@ -107,6 +107,7 @@ const formSlice = createSlice({
 
     markSaved: (state, action: PayloadAction<number>) => {
       state.savedId = action.payload;
+      state.editingId = action.payload;
     },
 
     /** Reset form to blank for a new interaction */

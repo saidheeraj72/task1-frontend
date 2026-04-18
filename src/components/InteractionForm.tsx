@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addInteraction, editInteraction, fetchInteractions } from '../store/interactionSlice';
 import { fetchHCPs, fetchMaterials, fetchSamples } from '../store/hcpSlice';
-import { setField, resetForm } from '../store/formSlice';
+import { setField, loadInteraction } from '../store/formSlice';
 import type { FormState } from '../store/formSlice';
 import type { RootState, AppDispatch } from '../store/store';
 
@@ -37,6 +37,13 @@ export default function InteractionForm() {
     dispatch(fetchSamples());
   }, [dispatch]);
 
+  // Clear local search state when switching interactions
+  useEffect(() => {
+    setHcpSearch('');
+    setAttendeeSearch('');
+    setMaterialSearch('');
+  }, [form.editingId, form.savedId]);
+
   const handleChange = (field: keyof FormState, value: any) => {
     dispatch(setField({ field, value }));
   };
@@ -60,16 +67,23 @@ export default function InteractionForm() {
 
     if (form.editingId) {
       await dispatch(editInteraction({ id: form.editingId, data: payload }));
+      dispatch(fetchInteractions());
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 3000);
     } else {
-      await dispatch(addInteraction(payload));
+      const resultAction = await dispatch(addInteraction(payload));
+      if (addInteraction.fulfilled.match(resultAction)) {
+        await dispatch(fetchInteractions());
+        // Load the newly created interaction so form.editingId updates and Chat can reference it
+        dispatch(loadInteraction(resultAction.payload));
+        setSubmitted(true);
+        setTimeout(() => {
+          setSubmitted(false);
+        }, 3000);
+      }
     }
-
-    dispatch(fetchInteractions());
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      dispatch(resetForm());
-    }, 3000);
   };
 
   const filteredHcps = hcps.filter((h) =>
@@ -121,6 +135,9 @@ export default function InteractionForm() {
               }}
               onFocus={() => setShowHcpDropdown(true)}
               onBlur={() => setTimeout(() => setShowHcpDropdown(false), 200)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.preventDefault();
+              }}
             />
             {showHcpDropdown && filteredHcps.length > 0 && (
               <ul className="dropdown-list">
@@ -197,6 +214,9 @@ export default function InteractionForm() {
               }}
               onFocus={() => setShowAttendeeDropdown(true)}
               onBlur={() => setTimeout(() => setShowAttendeeDropdown(false), 200)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.preventDefault();
+              }}
             />
           </div>
           {showAttendeeDropdown && filteredAttendees.length > 0 && (
@@ -257,6 +277,9 @@ export default function InteractionForm() {
                 placeholder="Search materials..."
                 value={materialSearch}
                 onChange={(e) => setMaterialSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') e.preventDefault();
+                }}
               />
               <ul>
                 {filteredMaterials.map((m) => (

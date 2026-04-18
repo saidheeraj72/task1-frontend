@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import * as api from '../services/api';
-import { fillFromAI, markSaved } from './formSlice';
+import { fillFromAI, loadInteraction } from './formSlice';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -24,12 +24,12 @@ const initialState: ChatState = {
 export const sendMessage = createAsyncThunk(
   'chat/sendMessage',
   async (
-    { message, conversationHistory }:
-    { message: string; conversationHistory: { role: string; content: string }[] },
+    { message, conversationHistory, interactionId }:
+    { message: string; conversationHistory: { role: string; content: string }[]; interactionId?: number | null },
     { rejectWithValue, dispatch },
   ) => {
     try {
-      const res = await api.sendChatMessage(message, conversationHistory);
+      const res = await api.sendChatMessage(message, conversationHistory, interactionId);
       const data = res.data;
 
       // Always fill the form if we got form_data back
@@ -40,9 +40,9 @@ export const sendMessage = createAsyncThunk(
         }));
       }
 
-      // If the tool saved to DB, mark it
+      // If the tool saved or edited on DB, load it natively
       if (data.saved_interaction?.id) {
-        dispatch(markSaved(data.saved_interaction.id));
+        dispatch(loadInteraction(data.saved_interaction));
       }
 
       return data;
